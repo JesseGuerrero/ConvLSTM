@@ -1,0 +1,124 @@
+program: train.py
+method: bayes
+metric:
+  name: final/best_val_loss
+  goal: minimize
+
+# Early termination to stop poorly performing runs
+early_terminate:
+  type: hyperband
+  min_iter: 10
+  eta: 2
+
+parameters:
+  # Architecture Parameters - All patterns from your original script
+  num_layers:
+    values: [2, 3, 4]
+  
+  hidden_dims:
+    values:
+      # 2-layer architectures
+      - [32, 64]
+      - [64, 64] 
+      - [64, 128]
+      - [48, 96]
+      - [32, 96]
+      
+      # 3-layer architectures
+      - [32, 64, 32]      # Bottleneck
+      - [64, 64, 64]      # Uniform
+      - [64, 128, 64]     # Large bottleneck
+      - [32, 64, 128]     # Progressive increase
+      - [128, 64, 32]     # Progressive decrease
+      - [96, 96, 96]      # Uniform large
+      - [48, 96, 48]      # Medium bottleneck
+      - [32, 96, 64]      # Asymmetric
+      
+      # 4-layer architectures
+      - [32, 64, 64, 32]
+      - [64, 128, 128, 64]
+      - [48, 96, 96, 48]
+      
+      # Specialized configurations
+      - [96, 128, 96]     # Ultra-optimized
+      - [64, 96, 64]      # Memory efficient
+      - [48, 96, 64]      # Long-term prediction
+      - [32, 48]          # Fast inference (2-layer)
+
+  # Learning Parameters - Exact values from your script
+  learning_rate:
+    values: [3e-5, 1e-4, 2e-4, 4e-4]
+  
+  batch_size:
+    values: [1, 2, 4, 8]  # Added 8 for fast inference config
+  
+  # Convolutional Parameters
+  kernel_size:
+    values: [[3, 3], [5, 5]]
+  
+  # Temporal Sequence Parameters - All combinations from your script
+  sequence_length:
+    values: [5, 8, 10, 12, 15, 16]
+  
+  target_length:
+    values: [3, 5, 6, 8, 10]
+  
+  # Image Processing Parameters  
+  image_size:
+    values: [256, 384, 512]
+  
+  # Regularization Parameters
+  gradient_clip_val:
+    values: [0.5, 0.8, 1.0, 1.5, 2.0]
+  
+  # Temporal Processing Parameters
+  temporal_stride:
+    values: [1, 2]
+  
+  temporal_dim:
+    value: 5  # Fixed as in your script
+  
+  use_temporal_fusion:
+    values: [true, false]
+  
+  # Training Parameters
+  max_epochs:
+    values: [40]  # Allow some variation
+  
+  precision:
+    value: "16-mixed"
+  
+  # Fixed Model Parameters
+  input_dim:
+    value: 3
+  
+  # Data Parameters - From your script defaults
+  train_split:
+    value: 0.8
+  
+  val_split:
+    value: 0.1
+  
+  num_workers:
+    values: [2, 4]  # Allow some variation for different systems
+  
+  normalize:
+    value: true
+  
+  # Logging Parameters
+  log_images:
+    value: true
+  
+  log_frequency:
+    values: [50, 100]
+  
+  # Path Parameters (will be overridden in script)
+  data_dir:
+    value: "./San_Antonio"
+
+# Additional sweep configuration
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_hyphens}
